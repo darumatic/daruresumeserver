@@ -6,12 +6,17 @@ var path = require('path');
 var logger = require('morgan');
 var fs = require('fs');
 var rimraf = require('rimraf');
+var cors = require('cors')
 
 
 var indexRouter = require('./routes/index');
 
 var app = express();
-
+var bodyParser = require('body-parser')
+app.use(bodyParser.json());
+app.use(cors())
+//support parsing of application/x-www-form-urlencoded post data
+app.use(bodyParser.urlencoded({ extended: true }));
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');

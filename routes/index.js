@@ -4,6 +4,7 @@ var path = require('path');
 var router = express.Router();
 const uuid = require('uuid');
 const exec = require('child_process').exec;
+const fs = require('fs');
 
  function  execShellCommand(cmd) {
   return new Promise((resolve, reject) => {
@@ -66,7 +67,18 @@ router.post('/upload',upload, async (req, res) => {
         res.render('index', { msg: "Resume created click download", file: `/download/${req.file.filename}` });
       }
 });
-
+router.post('/uploadjson', async (req, res) => {
+  let data = JSON.stringify(req.body);
+  var fileuuid = uuid.v4().toString()
+  fs.writeFile("./public/uploads/"+fileuuid+"resume.json", data,async function(){
+    var cmdGenerateResume = "hackmyresume build ./public/uploads/"+fileuuid+"resume.json TO ./public/downloads/"+fileuuid+"/out/resume.all -t node_modules/jsonresume-theme-daru"
+    await execShellCommand(cmdGenerateResume) ;
+    var cmdGenerateResumePDF = "wkhtmltopdf --margin-left '0mm' --margin-right '0mm' --header-html ./header.html --footer-html ./footer.html ./public/downloads/"+fileuuid+"/out/resume.pdf.html ./public/downloads/"+fileuuid+"/resumefinal.pdf"
+    await execShellCommand(cmdGenerateResumePDF) ;
+    res.send({ msg: "Resume created click download", file: `/download/${fileuuid}` });
+  });
+    
+});
 router.get('/download/:id', (req, res) => {
   console.log(req.params)
   res.download("./public/downloads/"+req.params.id+"/resumefinal.pdf");
